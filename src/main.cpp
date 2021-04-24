@@ -14,14 +14,19 @@ void PrintConfig();
 
 // Initialiaze all sensors and communication pipes
 void setup() {
+
     CustomSerialPrint::begin(230400); // Console print: initialize serial communication
 
     stabilization.Init();
     time.Init();
     stateMachine.Init();
+    pinMode(13, OUTPUT);
+    digitalWrite(13, LOW);
 
-    wdt_enable(WDTO_1S); // Set watchdog reset
     PrintConfig();
+    digitalWrite(13, HIGH);    
+
+//    wdt_enable(WDTO_2S); // Set watchdog reset
 }
 
 // Main loop
@@ -42,7 +47,7 @@ void loop() {
             time.ComputeMeanLoopTime(loopTimeSec, meanLoopTime, loopNb);
         }
     }
-    wdt_reset();
+//    wdt_reset();
 }
 
 void PrintConfig() {

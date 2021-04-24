@@ -1,9 +1,9 @@
 #ifndef CUSTOMSERIALPRINT_H_
 #define CUSTOMSERIALPRINT_H_
 
-//#define LOG_DEBUG 1 // Uncomment to activate verbose mode when running
+#define LOG_DEBUG 1 // Uncomment to activate verbose mode when running
 
-#include "../libraries/I2Cdev/I2Cdev.h"
+#include "I2Cdev.h"
 
 class CustomSerialPrint {
   public:

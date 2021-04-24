@@ -243,20 +243,19 @@ The pilot controls each attitude angle, and if transmitter sticks are centered, 
 
 ### 5.1 Components list
 
-As exemple, my hardware configuration for a 450mm quad:
+As exemple, my hardware configuration :
 
 | Component      | Reference      |
 | -------------- | -------------- |
-| **Microcontroller board** | Arduino Nano/Uno (ATmega328P MCU) |
-| **ESC** | Afro 20A-Simonk firmware 500Hz, BEC 0.5A 1060 to 1860 us pulse width |
-| **Motors** | Multistar 2216-800Kv 14 Poles - 222W Current max: 20A Shaft: 3mm 2-4S|
-| **Propellers** | 10x4.5 SF Props 2pc CW 2 pc CCW Rotation (Orange) |
-| **Battery** | Zippy Flightmax 3000mAh 4S |
-| **Receiver** | OrangeRx R617XL CPPM DSM2/DSMX 6 ch |
+| **Microcontroller board** | Arduino Nano |
+| **ESC** | Diatone Mamba F30Mini |
+| **Motors** | T-Motor F1103-11000KV |
+| **Propellers** | GemFan D51 |
+| **Battery** | Tattu 2S 450mAh |
+| **Receiver** | ESP8286 |
 | **IMU** | MPU6050 (GY-86 breakout board)|
 | **Compass** | HMC5883L (GY-86 breakout board) |
-| **Buzzer** | Matek lost model beeper - Built-in MCU |
-| **Frame** | Diatone Q450 Quad 450 V3. 450 mm wide frame choosen for better stability and higher autonomy (the lower the size, the lower the stability).|
+| **Frame** | Beta85X 2S Whoop |
 
 ### 5.2 Connexions
 TODO: add receiver in schematic

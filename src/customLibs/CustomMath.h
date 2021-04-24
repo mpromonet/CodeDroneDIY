@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "CustomSerialPrint.h"
-#include "../libraries/I2Cdev/I2Cdev.h"
+#include "I2Cdev.h"
 
 #define RAD2DEG(angle) angle * 180 / PI
 

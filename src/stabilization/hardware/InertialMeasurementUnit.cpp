@@ -11,7 +11,7 @@ void InertialMeasurementUnit::Init() {
     SetGyroRange(MPU6050_GYRO_FS_1000);
     SetAccRange(MPU6050_ACCEL_FS_8);
 
-    wdt_reset();
+//    wdt_reset();
     if (!accelgyro.testConnection())
         CustomSerialPrint::println(F("InertialMeasurementUnit: Function testConnection failed"));
 }
@@ -128,7 +128,7 @@ bool InertialMeasurementUnit::ComputeAccelOffsets() {
         CustomSerialPrint::print(accRaw[1][sample]);
         CustomSerialPrint::print("\t");
         CustomSerialPrint::println(accRaw[2][sample]);
-        wdt_reset();
+//        wdt_reset();
         delay(200);
     }
 
