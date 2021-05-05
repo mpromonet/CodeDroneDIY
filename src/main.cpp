@@ -14,19 +14,27 @@ void PrintConfig();
 
 // Initialiaze all sensors and communication pipes
 void setup() {
+    wdt_disable();
 
     CustomSerialPrint::begin(230400); // Console print: initialize serial communication
-
+    delay(1000);
+    CustomSerialPrint::println( F("!!!!!!!!!!!!!!!!!!!! BOOT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "));
     stabilization.Init();
     time.Init();
     stateMachine.Init();
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW);
+
+    for (int i = 0; i < 5; i++) {
+        pinMode(13, OUTPUT);
+        digitalWrite(13, LOW);
+        delay(250);
+
+        digitalWrite(13, HIGH);    
+        delay(250);
+    }
 
     PrintConfig();
-    digitalWrite(13, HIGH);    
 
-//    wdt_enable(WDTO_2S); // Set watchdog reset
+    wdt_enable(WDTO_8S); // Set watchdog reset
 }
 
 // Main loop
@@ -47,7 +55,7 @@ void loop() {
             time.ComputeMeanLoopTime(loopTimeSec, meanLoopTime, loopNb);
         }
     }
-//    wdt_reset();
+    wdt_reset();
 }
 
 void PrintConfig() {
