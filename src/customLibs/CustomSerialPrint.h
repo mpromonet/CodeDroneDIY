@@ -3,7 +3,7 @@
 
 #define LOG_DEBUG 1 // Uncomment to activate verbose mode when running
 
-#include "I2Cdev.h"
+#include <Arduino.h>
 
 class CustomSerialPrint {
   public:

@@ -2,7 +2,6 @@
 #define INERTIALMEASUREMENTUNIT_H_
 
 #include "Wire.h"
-#include "I2Cdev.h"
 #include "MPU6050.h"
 #include "../../customLibs/CustomMath.h"
 #include "../../customLibs/CustomSerialPrint.h"

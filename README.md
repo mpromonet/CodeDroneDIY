@@ -311,8 +311,6 @@ PlatformIO is an open source ecosystem for IoT development.
 sudo apt-get install python-pip
 sudo pip install --upgrade pip && sudo pip install -U platformio==3.5.2
 platformio platform install atmelavr --with-package=framework-arduinoavr
-platformio lib install MPU6050
-pio lib install "I2Cdevlib-MPU6050"
 ```
 
 Optional, for code format:
