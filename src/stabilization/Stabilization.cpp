@@ -109,21 +109,21 @@ void Stabilization::ComputeAttitude(float _angularPos[], float _angularSpeed[], 
 
     CustomMath::VectorNormalize(accRaw, nbAxis);
 
-    float rollAngleDeg = RAD2DEG(atan(accRaw[YAXIS] / accRaw[ZAXIS]));
+    float rollAngle = atan(accRaw[YAXIS] / accRaw[ZAXIS]);
     _angularPos[XAXIS] =
-            ApplyComplementaryFilter(_angularPos[XAXIS], gyroRaw[XAXIS], rollAngleDeg, _loopTime);
+            ApplyComplementaryFilter(_angularPos[XAXIS], gyroRaw[XAXIS], rollAngle, _loopTime);
 
-    float pitchAngleDeg = RAD2DEG(-atan(accRaw[XAXIS] / accRaw[ZAXIS]));
+    float pitchAngle = -atan(accRaw[XAXIS] / accRaw[ZAXIS]);
     _angularPos[YAXIS] =
-            ApplyComplementaryFilter(_angularPos[YAXIS], gyroRaw[YAXIS], pitchAngleDeg, _loopTime);
+            ApplyComplementaryFilter(_angularPos[YAXIS], gyroRaw[YAXIS], pitchAngle, _loopTime);
 }
 
 // Use complementary filter to merge gyro and accelerometer data
 // High pass filter on gyro, and low pass filter on accelerometer
 float Stabilization::ApplyComplementaryFilter(float _angularPos, float _gyroRaw,
-                                              float _angleDegrees, float _loopTime) {
+                                              float _angle, float _loopTime) {
     return HighPassFilterCoeff * (_angularPos + _gyroRaw * _loopTime)
-           + (1 - HighPassFilterCoeff) * _angleDegrees;
+           + (1 - HighPassFilterCoeff) * _angle;
 }
 
 void Stabilization::PrintAccroModeParameters() {

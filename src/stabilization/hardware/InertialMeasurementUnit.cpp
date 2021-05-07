@@ -1,4 +1,4 @@
-#include <avr/wdt.h>
+
 #include "InertialMeasurementUnit.h"
 void InertialMeasurementUnit::Init() {
     // MPU6050: join I2C bus
@@ -9,8 +9,8 @@ void InertialMeasurementUnit::Init() {
     if (!accelgyro.begin()) {
         CustomSerialPrint::println(F("InertialMeasurementUnit: Function testConnection failed"));
     } else {
-        SetGyroRange(MPU6050_RANGE_1000_DEG);
-        SetAccRange(MPU6050_RANGE_8_G);
+        accelgyro.setAccelerometerRange(MPU6050_RANGE_8_G);
+        accelgyro.setGyroRange(MPU6050_RANGE_1000_DEG);
 
         mpu_accel = accelgyro.getAccelerometerSensor();
         mpu_gyro = accelgyro.getGyroSensor();
@@ -18,8 +18,8 @@ void InertialMeasurementUnit::Init() {
 }
 
 void InertialMeasurementUnit::GetCorrectedAccelGyro(float _accMeasures[], float _gyroMeasures[]) {
-    int16_t accel[AXIS_NB] = {0, 0, 0};
-    int16_t gyro[AXIS_NB] = {0, 0, 0};
+    float accel[AXIS_NB] = {0, 0, 0};
+    float gyro[AXIS_NB] = {0, 0, 0};
 
     sensors_event_t accelevt;
     sensors_event_t gyroevt;
@@ -36,47 +36,9 @@ void InertialMeasurementUnit::GetCorrectedAccelGyro(float _accMeasures[], float 
 
     // Correct raw data with offset
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        _accMeasures[axis] =
-                static_cast<float>((accel[axis] - accOffsets[axis]) / AcceleroSensitivity);
-        _gyroMeasures[axis] =
-                static_cast<float>((gyro[axis] - gyroOffsets[axis]) / GyroSensitivity);
+        _accMeasures[axis] = (accel[axis] - accOffsets[axis]);
+        _gyroMeasures[axis] = (gyro[axis] - gyroOffsets[axis]);
     }
-}
-
-void InertialMeasurementUnit::SetAccRange(mpu6050_accel_range_t _range) {
-    switch (_range) {
-    case MPU6050_RANGE_2_G:
-        AcceleroSensitivity = 16384;
-        break;
-    case MPU6050_RANGE_4_G:
-        AcceleroSensitivity = 8192;
-        break;
-    case MPU6050_RANGE_8_G:
-        AcceleroSensitivity = 4096;
-        break;
-    case MPU6050_RANGE_16_G:
-        AcceleroSensitivity = 2048;
-        break;
-    }
-    accelgyro.setAccelerometerRange(_range);
-}
-
-void InertialMeasurementUnit::SetGyroRange(mpu6050_gyro_range_t _range) {
-    switch (_range) {
-    case MPU6050_RANGE_250_DEG:
-        GyroSensitivity = 131;
-        break;
-    case MPU6050_RANGE_500_DEG:
-        GyroSensitivity = 65.5;
-        break;
-    case MPU6050_RANGE_1000_DEG:
-        GyroSensitivity = 32.8;
-        break;
-    case MPU6050_RANGE_2000_DEG:
-        GyroSensitivity = 16.4;
-        break;
-    }
-    accelgyro.setGyroRange(_range);
 }
 
 // Compute accelerometer and gyroscope offsets
@@ -88,7 +50,7 @@ void InertialMeasurementUnit::ComputeOffsets() {
 }
 
 bool InertialMeasurementUnit::ComputeGyroOffsets() {
-    int16_t gyroRaw[AXIS_NB][SAMPLES_NB];
+    float gyroRaw[AXIS_NB][SAMPLES_NB];
     float mean = 0;
 
     for (int axis = 0; axis < AXIS_NB; axis++)
@@ -112,16 +74,16 @@ bool InertialMeasurementUnit::ComputeGyroOffsets() {
 
     // Compute mean
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        if (!CustomMath::ComputeMean(gyroRaw[axis], SAMPLES_NB, (10 * GyroSensitivity), &mean)) {
+        if (!CustomMath::ComputeMean(gyroRaw[axis], SAMPLES_NB, 10 , &mean)) {
             CustomSerialPrint::println(F("ERROR DURING SPEED OFFSETS COMPUTATION !!"));
             return false;
         }
-        gyroOffsets[axis] = static_cast<int16_t>(mean);
+        gyroOffsets[axis] = mean;
     }
 
     CustomSerialPrint::print(F("Gyroscope offsets Computed :"));
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        CustomSerialPrint::print(gyroOffsets[axis] / GyroSensitivity);
+        CustomSerialPrint::print(gyroOffsets[axis]);
         CustomSerialPrint::print(" ");
     }
     CustomSerialPrint::println("(deg.s-1) ");
@@ -129,7 +91,7 @@ bool InertialMeasurementUnit::ComputeGyroOffsets() {
 }
 
 bool InertialMeasurementUnit::ComputeAccelOffsets() {
-    int16_t accRaw[AXIS_NB][SAMPLES_NB];
+    float accRaw[AXIS_NB][SAMPLES_NB];
     float mean = 0.0;
 
     for (int axis = 0; axis < AXIS_NB; axis++)
@@ -153,20 +115,19 @@ bool InertialMeasurementUnit::ComputeAccelOffsets() {
 
     // Mean computation
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        if (!CustomMath::ComputeMean(accRaw[axis], SAMPLES_NB, (0.2 * AcceleroSensitivity),
-                                     &mean)) {
+        if (!CustomMath::ComputeMean(accRaw[axis], SAMPLES_NB, 0.2, &mean)) {
             CustomSerialPrint::println(F("ERROR DURING ACCELERATION OFFSETS COMPUTATION !!"));
             return false;
         }
-        accOffsets[axis] = static_cast<int16_t>(mean);
+        accOffsets[axis] = mean;
     }
 
-    // Zacc is gravity, it should be 1G ie 4096 LSB/g at -+8g sensitivity
-    accOffsets[2] = accOffsets[2] - AcceleroSensitivity;
+    // Zacc is gravity, it should be 1G
+    accOffsets[2] = accOffsets[2] - SENSORS_GRAVITY_STANDARD;
 
     CustomSerialPrint::print(F("Acceleration offsets Computed :"));
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        CustomSerialPrint::print(accOffsets[axis] / AcceleroSensitivity);
+        CustomSerialPrint::print(accOffsets[axis]);
         CustomSerialPrint::print(" ");
     }
     CustomSerialPrint::print("(m.s-2) ");

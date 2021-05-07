@@ -1,12 +1,12 @@
 #include "CustomMath.h"
 
-bool CustomMath::ComputeDelta(int16_t _list[], int _size, int16_t *_delta) {
+bool CustomMath::ComputeDelta(float _list[], int _size, float *_delta) {
 
     if (_size <= 2)
         return false;
 
-    int16_t maxVal = _list[0];
-    int16_t minVal = _list[0];
+    float maxVal = _list[0];
+    float minVal = _list[0];
 
     CustomSerialPrint::println(F("ComputeDelta : Samples:"));
     for (int sample = 0; sample < _size; sample++) {
@@ -22,12 +22,12 @@ bool CustomMath::ComputeDelta(int16_t _list[], int _size, int16_t *_delta) {
     return true;
 }
 
-bool CustomMath::ComputeMean(int16_t _list[], int _size, int16_t _deltaThreshold, float *_mean) {
+bool CustomMath::ComputeMean(float _list[], int _size, float _deltaThreshold, float *_mean) {
     if (_size <= 0)
         return false;
 
     // Check delta before computing mean
-    int16_t delta = 0;
+    float delta = 0;
     if (!ComputeDelta(_list, _size, &delta)) {
         CustomSerialPrint::println(F("ComputeMean: Error, ComputeDelta failed"));
         return false;
