@@ -6,64 +6,77 @@ void InertialMeasurementUnit::Init() {
     Wire.setClock(400000L); // Communication with MPU-6050 at 400KHz
 
     // Initialize MPU 6050
-    accelgyro.initialize();
-
-    SetGyroRange(MPU6050_GYRO_FS_1000);
-    SetAccRange(MPU6050_ACCEL_FS_8);
-
-    if (!accelgyro.testConnection())
+    if (!accelgyro.begin()) {
         CustomSerialPrint::println(F("InertialMeasurementUnit: Function testConnection failed"));
+    } else {
+        SetGyroRange(MPU6050_RANGE_1000_DEG);
+        SetAccRange(MPU6050_RANGE_8_G);
+
+        mpu_accel = accelgyro.getAccelerometerSensor();
+        mpu_gyro = accelgyro.getGyroSensor();
+    }
 }
 
 void InertialMeasurementUnit::GetCorrectedAccelGyro(float _accMeasures[], float _gyroMeasures[]) {
     int16_t accel[AXIS_NB] = {0, 0, 0};
-    int16_t speed[AXIS_NB] = {0, 0, 0};
+    int16_t gyro[AXIS_NB] = {0, 0, 0};
 
-    accelgyro.getMotion6(&accel[0], &accel[1], &accel[2], &speed[0], &speed[1], &speed[2]);
+    sensors_event_t accelevt;
+    sensors_event_t gyroevt;
+    sensors_event_t tempevt;
+    accelgyro.getEvent(&accelevt, &gyroevt, &tempevt);
+
+    accel[0] = accelevt.acceleration.x;
+    accel[1] = accelevt.acceleration.y;
+    accel[2] = accelevt.acceleration.z;
+
+    gyro[0] = gyroevt.gyro.x;
+    gyro[1] = gyroevt.gyro.y;
+    gyro[2] = gyroevt.gyro.z;
 
     // Correct raw data with offset
     for (int axis = 0; axis < AXIS_NB; axis++) {
         _accMeasures[axis] =
                 static_cast<float>((accel[axis] - accOffsets[axis]) / AcceleroSensitivity);
         _gyroMeasures[axis] =
-                static_cast<float>((speed[axis] - gyroOffsets[axis]) / GyroSensitivity);
+                static_cast<float>((gyro[axis] - gyroOffsets[axis]) / GyroSensitivity);
     }
 }
 
-void InertialMeasurementUnit::SetAccRange(uint8_t _range) {
+void InertialMeasurementUnit::SetAccRange(mpu6050_accel_range_t _range) {
     switch (_range) {
-    case MPU6050_ACCEL_FS_2:
+    case MPU6050_RANGE_2_G:
         AcceleroSensitivity = 16384;
         break;
-    case MPU6050_ACCEL_FS_4:
+    case MPU6050_RANGE_4_G:
         AcceleroSensitivity = 8192;
         break;
-    case MPU6050_ACCEL_FS_8:
+    case MPU6050_RANGE_8_G:
         AcceleroSensitivity = 4096;
         break;
-    case MPU6050_ACCEL_FS_16:
+    case MPU6050_RANGE_16_G:
         AcceleroSensitivity = 2048;
         break;
     }
-    accelgyro.setFullScaleAccelRange(_range);
+    accelgyro.setAccelerometerRange(_range);
 }
 
-void InertialMeasurementUnit::SetGyroRange(uint8_t _range) {
+void InertialMeasurementUnit::SetGyroRange(mpu6050_gyro_range_t _range) {
     switch (_range) {
-    case MPU6050_GYRO_FS_250:
+    case MPU6050_RANGE_250_DEG:
         GyroSensitivity = 131;
         break;
-    case MPU6050_GYRO_FS_500:
+    case MPU6050_RANGE_500_DEG:
         GyroSensitivity = 65.5;
         break;
-    case MPU6050_GYRO_FS_1000:
+    case MPU6050_RANGE_1000_DEG:
         GyroSensitivity = 32.8;
         break;
-    case MPU6050_GYRO_FS_2000:
+    case MPU6050_RANGE_2000_DEG:
         GyroSensitivity = 16.4;
         break;
     }
-    accelgyro.setFullScaleGyroRange(_range);
+    accelgyro.setGyroRange(_range);
 }
 
 // Compute accelerometer and gyroscope offsets
@@ -84,7 +97,11 @@ bool InertialMeasurementUnit::ComputeGyroOffsets() {
 
     // Get 10 samples during 2 sec
     for (int sample = 0; sample < 10; sample++) {
-        accelgyro.getRotation(&gyroRaw[0][sample], &gyroRaw[1][sample], &gyroRaw[2][sample]);
+        sensors_event_t gyro;
+        mpu_gyro->getEvent(&gyro);
+        gyroRaw[0][sample] = gyro.gyro.x;
+        gyroRaw[1][sample] = gyro.gyro.y;
+        gyroRaw[2][sample] = gyro.gyro.z;
         CustomSerialPrint::print(gyroRaw[0][sample]);
         CustomSerialPrint::print("\t");
         CustomSerialPrint::print(gyroRaw[1][sample]);
@@ -121,7 +138,11 @@ bool InertialMeasurementUnit::ComputeAccelOffsets() {
 
     // Get 10 samples during 2 sec
     for (int sample = 0; sample < 10; sample++) {
-        accelgyro.getAcceleration(&accRaw[0][sample], &accRaw[1][sample], &accRaw[2][sample]);
+        sensors_event_t accel;
+        mpu_accel->getEvent(&accel);
+        accRaw[0][sample] = accel.acceleration.x;
+        accRaw[1][sample] = accel.acceleration.y;
+        accRaw[2][sample] = accel.acceleration.z;        
         CustomSerialPrint::print(accRaw[0][sample]);
         CustomSerialPrint::print("\t");
         CustomSerialPrint::print(accRaw[1][sample]);

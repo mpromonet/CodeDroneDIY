@@ -2,8 +2,7 @@
 #define INERTIALMEASUREMENTUNIT_H_
 
 #include "Wire.h"
-#include "I2Cdev.h"
-#include "MPU6050.h"
+#include "Adafruit_MPU6050.h"
 #include "../../customLibs/CustomMath.h"
 #include "../../customLibs/CustomSerialPrint.h"
 
@@ -17,13 +16,15 @@ class InertialMeasurementUnit{
     int16_t accOffsets[AXIS_NB] = {0, 0, 0};
     bool initialized = false;
     bool offsetComputed = false;
-    MPU6050 accelgyro; // IMU
+    Adafruit_MPU6050 accelgyro; // IMU
+    Adafruit_Sensor *mpu_accel;
+    Adafruit_Sensor *mpu_gyro;
 
   private:
     bool ComputeGyroOffsets();
     bool ComputeAccelOffsets();
-    void SetAccRange(uint8_t _range);
-    void SetGyroRange(uint8_t _range);
+    void SetAccRange(mpu6050_accel_range_t _range);
+    void SetGyroRange(mpu6050_gyro_range_t _range);
 
   public:
     void Init();
