@@ -11,6 +11,7 @@ void InertialMeasurementUnit::Init() {
     } else {
         accelgyro.setAccelerometerRange(MPU6050_RANGE_8_G);
         accelgyro.setGyroRange(MPU6050_RANGE_1000_DEG);
+        accelgyro.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
         mpu_accel = accelgyro.getAccelerometerSensor();
         mpu_gyro = accelgyro.getGyroSensor();
@@ -51,7 +52,6 @@ void InertialMeasurementUnit::ComputeOffsets() {
 
 bool InertialMeasurementUnit::ComputeGyroOffsets() {
     float gyroRaw[AXIS_NB][SAMPLES_NB];
-    float mean = 0;
 
     for (int axis = 0; axis < AXIS_NB; axis++)
         for (int sample = 0; sample < 10; sample++)
@@ -73,26 +73,27 @@ bool InertialMeasurementUnit::ComputeGyroOffsets() {
     }
 
     // Compute mean
+    float gyroDeltas[AXIS_NB] = {0, 0, 0};  
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        if (!CustomMath::ComputeMean(gyroRaw[axis], SAMPLES_NB, 10 , &mean)) {
+        if (!CustomMath::ComputeMean(gyroRaw[axis], SAMPLES_NB, 0.2 , &gyroOffsets[axis], &gyroDeltas[axis])) {
             CustomSerialPrint::println(F("ERROR DURING SPEED OFFSETS COMPUTATION !!"));
             return false;
-        }
-        gyroOffsets[axis] = mean;
+        }     
     }
 
     CustomSerialPrint::print(F("Gyroscope offsets Computed :"));
     for (int axis = 0; axis < AXIS_NB; axis++) {
         CustomSerialPrint::print(gyroOffsets[axis]);
-        CustomSerialPrint::print(" ");
+        CustomSerialPrint::print("(");
+        CustomSerialPrint::print(gyroDeltas[axis]);
+        CustomSerialPrint::print(") ");
     }
-    CustomSerialPrint::println("(deg.s-1) ");
+    CustomSerialPrint::println("(rad.s-1) ");
     return true;
 }
 
 bool InertialMeasurementUnit::ComputeAccelOffsets() {
     float accRaw[AXIS_NB][SAMPLES_NB];
-    float mean = 0.0;
 
     for (int axis = 0; axis < AXIS_NB; axis++)
         for (int sample = 0; sample < 10; sample++)
@@ -114,21 +115,20 @@ bool InertialMeasurementUnit::ComputeAccelOffsets() {
     }
 
     // Mean computation
+    float accDeltas[AXIS_NB] = {0, 0, 0};
     for (int axis = 0; axis < AXIS_NB; axis++) {
-        if (!CustomMath::ComputeMean(accRaw[axis], SAMPLES_NB, 0.2, &mean)) {
+        if (!CustomMath::ComputeMean(accRaw[axis], SAMPLES_NB, 0.2, &accOffsets[axis], &accDeltas[axis])) {
             CustomSerialPrint::println(F("ERROR DURING ACCELERATION OFFSETS COMPUTATION !!"));
             return false;
-        }
-        accOffsets[axis] = mean;
+        }    
     }
-
-    // Zacc is gravity, it should be 1G
-    accOffsets[2] = accOffsets[2] - SENSORS_GRAVITY_STANDARD;
 
     CustomSerialPrint::print(F("Acceleration offsets Computed :"));
     for (int axis = 0; axis < AXIS_NB; axis++) {
         CustomSerialPrint::print(accOffsets[axis]);
-        CustomSerialPrint::print(" ");
+        CustomSerialPrint::print("(");
+        CustomSerialPrint::print(accDeltas[axis]);
+        CustomSerialPrint::print(") ");
     }
     CustomSerialPrint::print("(m.s-2) ");
     return true;

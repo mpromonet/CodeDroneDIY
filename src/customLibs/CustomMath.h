@@ -12,7 +12,7 @@
 class CustomMath {
   public:
     static bool ComputeDelta(float _list[], int _size, float *_delta);
-    static bool ComputeMean(float _list[], int _size, float _deltaThreshold, float *_mean);
+    static bool ComputeMean(float _list[], int _size, float _deltaThreshold, float *_mean, float* _delta);
     static void VectorNormalize(float _vectorIn[], const int vectorSize);
 };
 

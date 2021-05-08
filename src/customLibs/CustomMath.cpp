@@ -8,21 +8,17 @@ bool CustomMath::ComputeDelta(float _list[], int _size, float *_delta) {
     float maxVal = _list[0];
     float minVal = _list[0];
 
-    CustomSerialPrint::println(F("ComputeDelta : Samples:"));
     for (int sample = 0; sample < _size; sample++) {
-        CustomSerialPrint::println(_list[sample]);
         if (_list[sample] > maxVal)
             maxVal = _list[sample];
         if (_list[sample] < minVal)
             minVal = _list[sample];
     }
     (*_delta) = abs(maxVal - minVal);
-    CustomSerialPrint::println(F("ComputeDelta: delta:"));
-    CustomSerialPrint::println(*_delta);
     return true;
 }
 
-bool CustomMath::ComputeMean(float _list[], int _size, float _deltaThreshold, float *_mean) {
+bool CustomMath::ComputeMean(float _list[], int _size, float _deltaThreshold, float *_mean, float *_delta) {
     if (_size <= 0)
         return false;
 

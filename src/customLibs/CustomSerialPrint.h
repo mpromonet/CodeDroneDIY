@@ -18,6 +18,14 @@ class CustomSerialPrint {
         Serial.println(_number);
     }
 
+    static void print(long unsigned int _number) {
+        Serial.print(_number);
+    }
+
+    static void println(long unsigned int _number) {
+        Serial.println(_number);
+    }    
+
     static void print(String _string) {
         Serial.print(_string);
     }
@@ -26,9 +34,14 @@ class CustomSerialPrint {
         Serial.println(_string);
     }
 
-    static void println(double _string, int significantNb) {
+    static void print(double _string, int significantNb = 3) {
+        Serial.print(_string, significantNb);
+    }
+
+    static void println(double _string, int significantNb = 3) {
         Serial.println(_string, significantNb);
     }
+
 #else
     static void begin(unsigned long _baudRate) {
     }
@@ -38,13 +51,22 @@ class CustomSerialPrint {
     static void println(int _number) {
     }
 
+    static void print(long unsigned int _number) {
+    }
+
+    static void println(long unsigned int _number) {
+    }     
+
     static void print(String _string) {
     }
 
     static void println(String _string) {
     }
 
-    static void println(double _string, int significantNb) {
+    static void print(double _string, int significantNb = 3) {
+    }
+
+    static void println(double _string, int significantNb = 3) {
     }
 #endif
 };
