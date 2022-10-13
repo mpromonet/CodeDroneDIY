@@ -1,7 +1,6 @@
 #ifndef CUSTOMMATH_H_
 #define CUSTOMMATH_H_
 
-#include <avr/wdt.h>
 #include <limits.h>
 #include <math.h>
 

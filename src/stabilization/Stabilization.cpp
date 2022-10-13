@@ -1,5 +1,4 @@
 #ifndef UNIT_TEST
-#include <avr/wdt.h>
 #include "Stabilization.h"
 
 void Stabilization::Init() {
